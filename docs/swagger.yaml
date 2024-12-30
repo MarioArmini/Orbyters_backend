@@ -1,0 +1,159 @@
+basePath: /
+definitions:
+  dto.LoginData:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  models.User:
+    properties:
+      createdAt:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      passWordHash:
+        type: string
+      surname:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API documentation for the Orbyters project
+  title: Orbyters API Documentation
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Login an existing user and get a JWT token
+      parameters:
+      - description: User login data
+        in: body
+        name: loginData
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LoginData'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Login successful, JWT token returned
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid input
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Invalid email or password
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: User Login
+      tags:
+      - Users
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user in the system
+      parameters:
+      - description: User registration data
+        in: body
+        name: registration
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User registered successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid input
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: User Registration
+      tags:
+      - Users
+  /gpt-neo/generate:
+    post:
+      consumes:
+      - application/json
+      description: Call the Hugging Face GPT-Neo model with a prompt and return generated
+        text
+      parameters:
+      - description: Prompt to generate text
+        in: body
+        name: prompt
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Generated text
+          schema:
+            type: string
+        "400":
+          description: Invalid input
+          schema:
+            type: string
+        "500":
+          description: Error calling GPT-Neo API
+          schema:
+            type: string
+      summary: Generate text using GPT-Neo model
+      tags:
+      - DialoGPT
+  /user/details:
+    get:
+      consumes:
+      - application/json
+      description: Get the details of the currently authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User details
+          schema:
+            $ref: '#/definitions/models.User'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get details of the logged-in user
+      tags:
+      - Users
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
