@@ -7,6 +7,11 @@ definitions:
       password:
         type: string
     type: object
+  dto.RequestDto:
+    properties:
+      inputs:
+        type: string
+    type: object
   models.User:
     properties:
       createdAt:
@@ -97,19 +102,19 @@ paths:
       summary: User Registration
       tags:
       - Users
-  /gpt-neo/generate:
+  /mistral/generate:
     post:
       consumes:
       - application/json
-      description: Call the Hugging Face GPT-Neo model with a prompt and return generated
+      description: Call the Hugging Face Mistral model with a prompt and return generated
         text
       parameters:
-      - description: Prompt to generate text
+      - description: Request dto
         in: body
-        name: prompt
+        name: requestDto
         required: true
         schema:
-          type: string
+          $ref: '#/definitions/dto.RequestDto'
       produces:
       - application/json
       responses:
@@ -121,13 +126,21 @@ paths:
           description: Invalid input
           schema:
             type: string
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "500":
-          description: Error calling GPT-Neo API
+          description: Error calling Mistral API
           schema:
             type: string
-      summary: Generate text using GPT-Neo model
+      security:
+      - BearerAuth: []
+      summary: Generate text using Mistral AI model
       tags:
-      - DialoGPT
+      - Chatbot
   /user/details:
     get:
       consumes:

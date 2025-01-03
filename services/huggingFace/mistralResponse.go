@@ -9,12 +9,32 @@ import (
 	"net/http"
 )
 
-func GetGPTNeoResponse(prompt string) (string, error) {
+type Choice struct {
+	Message struct {
+		Role    string `json:"role"`
+		Content string `json:"content"`
+	} `json:"message"`
+}
+
+type APIResponse struct {
+	Choices []Choice `json:"choices"`
+}
+
+func GetMistralResponse(prompt string) (string, error) {
 	apiToken := config.HuggingFaceKey
 	url := config.HugginFaceUrl
 
+	message := map[string]interface{}{
+		"role":    "user",
+		"content": prompt,
+	}
+
 	body := map[string]interface{}{
-		"inputs": prompt,
+		"model":       config.ModelName,
+		"messages":    []map[string]interface{}{message},
+		"temperature": 0.5,
+		"max_tokens":  2048,
+		"top_p":       0.7,
 	}
 
 	jsonData, err := json.Marshal(body)
@@ -46,14 +66,14 @@ func GetGPTNeoResponse(prompt string) (string, error) {
 		return "", fmt.Errorf("error: received status code %d", resp.StatusCode)
 	}
 
-	var response []map[string]interface{}
-	err = json.Unmarshal(respBody, &response)
+	var apiResp APIResponse
+	err = json.Unmarshal(respBody, &apiResp)
 	if err != nil {
 		return "", fmt.Errorf("error unmarshalling response: %v", err)
 	}
 
-	if len(response) > 0 && response[0]["generated_text"] != nil {
-		return response[0]["generated_text"].(string), nil
+	if len(apiResp.Choices) > 0 && apiResp.Choices[0].Message.Content != "" {
+		return apiResp.Choices[0].Message.Content, nil
 	}
 
 	return "", fmt.Errorf("no generated text found in response")

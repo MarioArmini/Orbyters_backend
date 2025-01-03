@@ -13,6 +13,7 @@ var (
 	DBConnectionString string
 	HuggingFaceKey     string
 	HugginFaceUrl      string
+	ModelName          string
 )
 
 func LoadConfig() {
@@ -30,4 +31,5 @@ func LoadConfig() {
 	DBConnectionString = os.Getenv("DB_CONNECTION_STRING")
 	HuggingFaceKey = os.Getenv("HUGGING_FACE_KEY")
 	HugginFaceUrl = os.Getenv("HUGGING_FACE_URL")
+	ModelName = os.Getenv("MODEL_NAME")
 }

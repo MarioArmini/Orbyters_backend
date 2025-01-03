@@ -52,7 +52,7 @@ func main() {
 	authRoutes.RegisterRoutes(router, db)
 	authRoutes.LoginRoutes(router, db)
 	usersRoutes.GetUserDetails(router, db)
-	huggingFaceRoutes.GenerateGPTNeoText(router)
+	huggingFaceRoutes.GenerateMistralText(router)
 
 	err = router.Run(":8080")
 	if err != nil {

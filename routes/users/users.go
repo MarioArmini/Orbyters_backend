@@ -2,10 +2,8 @@ package routes
 
 import (
 	"Orbyters/models"
-	jwtService "Orbyters/services/jwt"
-	"fmt"
+	"Orbyters/services/middlewares"
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -21,25 +19,14 @@ import (
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Router /user/details [get]
 func GetUserDetails(router *gin.Engine, db *gorm.DB) {
-	router.GET("/user/details", func(c *gin.Context) {
-		tokenString := c.GetHeader("Authorization")
-
-		if tokenString == "" || !strings.HasPrefix(tokenString, "Bearer ") {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Token is missing or malformed"})
+	router.GET("/user/details", middlewares.AuthMiddleware(), func(c *gin.Context) {
+		claims, exists := c.Get("claims")
+		if !exists {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to retrieve user claims"})
 			return
 		}
 
-		tokenString = tokenString[7:]
-
-		claims, err := jwtService.ValidateJWT(tokenString)
-		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
-			return
-		}
-
-		userId := claims.UserID
-
-		fmt.Print(userId)
+		userId := claims.(map[string]interface{})["UserID"]
 
 		var user models.User
 		if err := db.First(&user, userId).Error; err != nil {

@@ -116,9 +116,14 @@ const docTemplate = `{
                 }
             }
         },
-        "/gpt-neo/generate": {
+        "/mistral/generate": {
             "post": {
-                "description": "Call the Hugging Face GPT-Neo model with a prompt and return generated text",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Call the Hugging Face Mistral model with a prompt and return generated text",
                 "consumes": [
                     "application/json"
                 ],
@@ -126,17 +131,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "DialoGPT"
+                    "Chatbot"
                 ],
-                "summary": "Generate text using GPT-Neo model",
+                "summary": "Generate text using Mistral AI model",
                 "parameters": [
                     {
-                        "description": "Prompt to generate text",
-                        "name": "prompt",
+                        "description": "Request dto",
+                        "name": "requestDto",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/dto.RequestDto"
                         }
                     }
                 ],
@@ -153,8 +158,17 @@ const docTemplate = `{
                             "type": "string"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
                     "500": {
-                        "description": "Error calling GPT-Neo API",
+                        "description": "Error calling Mistral API",
                         "schema": {
                             "type": "string"
                         }
@@ -208,6 +222,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.RequestDto": {
+            "type": "object",
+            "properties": {
+                "inputs": {
                     "type": "string"
                 }
             }

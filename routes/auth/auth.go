@@ -50,7 +50,7 @@ func RegisterRoutes(router *gin.Engine, db *gorm.DB) {
 // @Tags Users
 // @Accept json
 // @Produce json
-// @Param loginData body dto.LoginData true "User login data"  // Usa il tipo definito nel file models/login.go
+// @Param loginData body dto.LoginData true "User login data"
 // @Success 200 {object} map[string]string "Login successful, JWT token returned"
 // @Failure 400 {object} map[string]string "Invalid input"
 // @Failure 401 {object} map[string]string "Invalid email or password"
