@@ -48,9 +48,11 @@ Includes additional documentation for developers and users of the project.
    - Create a `.env` file.
    - Add keys such as:
      ```
-     DATABASE_URL=<DB_URL>
-     JWT_SECRET=<JWT_SECRET>
-     HF_API_KEY=<HUGGINGFACE_KEY>
+      DB_CONNECTION_STRING
+      JWT_SECRET
+      HUGGING_FACE_KEY
+      HUGGING_FACE_URL="https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions"
+      MODEL_NAME="mistralai/Mistral-7B-Instruct-v0.2"
      ```
 
 3. **Install dependencies**:
@@ -74,7 +76,7 @@ Includes additional documentation for developers and users of the project.
 |--------|--------------------|------------------------------------|
 | GET    | `/user/details`    | Fetches details of the authenticated user. |
 | POST   | `/auth/login`      | Logs in and returns a JWT token.    |
-| POST   | `/huggingFace/query` | Queries a Hugging Face AI model.    |
+| POST   | `/mistral/generate` | Generates a chatbot response starting from a prompt.    |
 
 ## Tools
 
