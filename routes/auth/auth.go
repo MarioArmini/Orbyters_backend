@@ -1,8 +1,8 @@
 package routes
 
 import (
-	"Orbyters/models"
 	"Orbyters/models/auth/dto"
+	models "Orbyters/models/users"
 	jwtService "Orbyters/services/jwt"
 	"net/http"
 
@@ -16,13 +16,14 @@ import (
 // @Tags Users
 // @Accept json
 // @Produce json
-// @Param registration body models.User true "User registration data"
+// @Param registration body users.User true "User registration data"
 // @Success 201 {object} map[string]string "User registered successfully"
 // @Failure 400 {object} map[string]string "Invalid input"
 // @Router /auth/register [post]
 func RegisterRoutes(router *gin.Engine, db *gorm.DB) {
 	router.POST("/auth/register", func(c *gin.Context) {
 		var user models.User
+
 		if err := c.BindJSON(&user); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 			return
@@ -35,6 +36,13 @@ func RegisterRoutes(router *gin.Engine, db *gorm.DB) {
 		}
 
 		user.PassWordHash = string(hashedPassword)
+
+		customerRole, err := models.GetRoleByName(db, "Customer")
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error creating user"})
+			return
+		}
+		user.Roles = append(user.Roles, *customerRole)
 
 		if err := user.CreateUser(db); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error creating user"})

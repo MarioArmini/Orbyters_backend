@@ -1,7 +1,8 @@
 package routes
 
 import (
-	"Orbyters/models"
+	models "Orbyters/models/users"
+	services "Orbyters/services/jwt"
 	"Orbyters/services/middlewares"
 	"net/http"
 
@@ -15,7 +16,7 @@ import (
 // @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Success 200 {object} models.User "User details"
+// @Success 200 {object} users.User "User details"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Router /user/details [get]
 func GetUserDetails(router *gin.Engine, db *gorm.DB) {
@@ -26,10 +27,16 @@ func GetUserDetails(router *gin.Engine, db *gorm.DB) {
 			return
 		}
 
-		userId := claims.(map[string]interface{})["UserID"]
+		claimData, ok := claims.(*services.Claims)
+		if !ok {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid claim type"})
+			return
+		}
+
+		userId := claimData.UserID
 
 		var user models.User
-		if err := db.First(&user, userId).Error; err != nil {
+		if err := db.Preload("Roles").First(&user, userId).Error; err != nil {
 			if err == gorm.ErrRecordNotFound {
 				c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 			} else {
@@ -44,6 +51,7 @@ func GetUserDetails(router *gin.Engine, db *gorm.DB) {
 			"name":      user.Name,
 			"surname":   user.Surname,
 			"createdAt": user.CreatedAt,
+			"roles":     user.Roles,
 		})
 	})
 }

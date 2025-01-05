@@ -2,9 +2,10 @@ package main
 
 import (
 	"Orbyters/config"
-	"Orbyters/models"
+	models "Orbyters/models/users"
 	authRoutes "Orbyters/routes/auth"
 	huggingFaceRoutes "Orbyters/routes/huggingFace"
+	rolesRoutes "Orbyters/routes/roles"
 	usersRoutes "Orbyters/routes/users"
 	"log"
 
@@ -37,6 +38,8 @@ func main() {
 
 	db.AutoMigrate(&models.User{})
 
+	config.SeedRoles(db)
+
 	router := gin.Default()
 
 	router.Use(cors.New(cors.Config{
@@ -53,6 +56,7 @@ func main() {
 	authRoutes.LoginRoutes(router, db)
 	usersRoutes.GetUserDetails(router, db)
 	huggingFaceRoutes.GenerateMistralText(router)
+	rolesRoutes.GetAllRoles(router, db)
 
 	err = router.Run(":8080")
 	if err != nil {

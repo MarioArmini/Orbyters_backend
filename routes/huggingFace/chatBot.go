@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"Orbyters/models/dialoGPT/dto"
+	"Orbyters/models/mistral/dto"
 	huggingFaceService "Orbyters/services/huggingFace"
 	"Orbyters/services/middlewares"
 	"net/http"

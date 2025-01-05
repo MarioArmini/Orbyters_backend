@@ -12,7 +12,22 @@ definitions:
       inputs:
         type: string
     type: object
-  models.User:
+  users.Role:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      updatedAt:
+        type: string
+      users:
+        items:
+          $ref: '#/definitions/users.User'
+        type: array
+    type: object
+  users.User:
     properties:
       createdAt:
         type: string
@@ -24,6 +39,10 @@ definitions:
         type: string
       passWordHash:
         type: string
+      roles:
+        items:
+          $ref: '#/definitions/users.Role'
+        type: array
       surname:
         type: string
       updatedAt:
@@ -83,7 +102,7 @@ paths:
         name: registration
         required: true
         schema:
-          $ref: '#/definitions/models.User'
+          $ref: '#/definitions/users.User'
       produces:
       - application/json
       responses:
@@ -141,6 +160,28 @@ paths:
       summary: Generate text using Mistral AI model
       tags:
       - Chatbot
+  /roles:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Roles
+          schema:
+            items:
+              $ref: '#/definitions/users.Role'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get All existing roles
+      tags:
+      - Roles
   /user/details:
     get:
       consumes:
@@ -152,7 +193,7 @@ paths:
         "200":
           description: User details
           schema:
-            $ref: '#/definitions/models.User'
+            $ref: '#/definitions/users.User'
         "401":
           description: Unauthorized
           schema:
