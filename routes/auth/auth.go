@@ -16,25 +16,34 @@ import (
 // @Tags Users
 // @Accept json
 // @Produce json
-// @Param registration body users.User true "User registration data"
+// @Param registration body dto.SignUpData true "User registration data"
 // @Success 201 {object} map[string]string "User registered successfully"
 // @Failure 400 {object} map[string]string "Invalid input"
 // @Router /auth/register [post]
 func RegisterRoutes(router *gin.Engine, db *gorm.DB) {
 	router.POST("/auth/register", func(c *gin.Context) {
+		var signUpData dto.SignUpData
 		var user models.User
 
-		if err := c.BindJSON(&user); err != nil {
+		if err := c.BindJSON(&signUpData); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 			return
 		}
 
-		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.PassWordHash), bcrypt.DefaultCost)
+		if err := signUpData.Validate(); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"validation error": err})
+			return
+		}
+
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(signUpData.Password), bcrypt.DefaultCost)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
 			return
 		}
 
+		user.Name = signUpData.Name
+		user.Surname = signUpData.Surname
+		user.Email = &signUpData.Email
 		user.PassWordHash = string(hashedPassword)
 
 		customerRole, err := models.GetRoleByName(db, "Customer")

@@ -12,6 +12,17 @@ definitions:
       inputs:
         type: string
     type: object
+  dto.SignUpData:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      surname:
+        type: string
+    type: object
   users.Role:
     properties:
       createdAt:
@@ -102,7 +113,7 @@ paths:
         name: registration
         required: true
         schema:
-          $ref: '#/definitions/users.User'
+          $ref: '#/definitions/dto.SignUpData'
       produces:
       - application/json
       responses:

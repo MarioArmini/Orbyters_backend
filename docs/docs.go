@@ -90,7 +90,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/users.User"
+                            "$ref": "#/definitions/dto.SignUpData"
                         }
                     }
                 ],
@@ -266,6 +266,23 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "inputs": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.SignUpData": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "surname": {
                     "type": "string"
                 }
             }
