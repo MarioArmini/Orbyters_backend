@@ -15,6 +15,11 @@ var (
 	HugginFaceUrl      string
 	ModelName          string
 	CorsNames          string
+	SmtpHost           string
+	SmtpPort           string
+	SmtpUser           string
+	SmtpPass           string
+	SmtpMail           string
 )
 
 func LoadConfig() {
@@ -34,4 +39,10 @@ func LoadConfig() {
 	HugginFaceUrl = os.Getenv("HUGGING_FACE_URL")
 	ModelName = os.Getenv("MODEL_NAME")
 	CorsNames = os.Getenv("CORS")
+
+	SmtpHost = os.Getenv("SMTP_HOST")
+	SmtpPort = os.Getenv("SMTP_PORT")
+	SmtpUser = os.Getenv("SMTP_USERNAME")
+	SmtpPass = os.Getenv("SMTP_PASSWORD")
+	SmtpMail = os.Getenv("FROM_EMAIL")
 }

@@ -4,7 +4,10 @@ import (
 	"Orbyters/models/auth/dto"
 	models "Orbyters/models/users"
 	userDto "Orbyters/models/users/dto"
+	emailService "Orbyters/services/emails"
 	jwtService "Orbyters/services/jwt"
+	emailTemplates "Orbyters/shared/emails"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -57,6 +60,17 @@ func RegisterRoutes(router *gin.Engine, db *gorm.DB) {
 		if err := user.CreateUser(db); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error creating user"})
 			return
+		}
+
+		emailService := emailService.NewEmailService()
+		subject, body := emailTemplates.GetSignUpEmailTemplate()
+		recipients := []string{*user.Email}
+
+		err = emailService.SendEmail(subject, body, recipients)
+		if err != nil {
+			log.Fatalf("Error sending mail: %v", err)
+		} else {
+			log.Println("Email sent")
 		}
 
 		c.JSON(http.StatusOK, gin.H{"message": "User registered successfully"})
