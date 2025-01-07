@@ -3,6 +3,7 @@ package routes
 import (
 	"Orbyters/models/auth/dto"
 	models "Orbyters/models/users"
+	userDto "Orbyters/models/users/dto"
 	jwtService "Orbyters/services/jwt"
 	"net/http"
 
@@ -81,8 +82,13 @@ func LoginRoutes(router *gin.Engine, db *gorm.DB) {
 			return
 		}
 
+		if err := loginData.Validate(); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"validation error": err})
+			return
+		}
+
 		var user models.User
-		err := db.Where("email = ?", loginData.Email).First(&user).Error
+		err := db.Where("email = ?", loginData.Email).Preload("Roles").First(&user).Error
 		if err != nil {
 			if err == gorm.ErrRecordNotFound {
 				c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
@@ -104,6 +110,15 @@ func LoginRoutes(router *gin.Engine, db *gorm.DB) {
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"token": tokenString})
+		c.JSON(http.StatusOK, gin.H{
+			"token": tokenString,
+			"user": userDto.UserDto{
+				Id:      user.Id,
+				Email:   user.Email,
+				Name:    user.Name,
+				Surname: user.Surname,
+				Roles:   user.Roles,
+			},
+		})
 	})
 }

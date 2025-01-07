@@ -8,6 +8,7 @@ import (
 	rolesRoutes "Orbyters/routes/roles"
 	usersRoutes "Orbyters/routes/users"
 	"log"
+	"strings"
 
 	_ "Orbyters/docs"
 
@@ -43,7 +44,7 @@ func main() {
 	router := gin.Default()
 
 	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:8080", "http://127.0.0.1:8080", "http://localhost:3000"},
+		AllowOrigins:     strings.Split(config.CorsNames, ","),
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},

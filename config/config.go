@@ -14,6 +14,7 @@ var (
 	HuggingFaceKey     string
 	HugginFaceUrl      string
 	ModelName          string
+	CorsNames          string
 )
 
 func LoadConfig() {
@@ -32,4 +33,5 @@ func LoadConfig() {
 	HuggingFaceKey = os.Getenv("HUGGING_FACE_KEY")
 	HugginFaceUrl = os.Getenv("HUGGING_FACE_URL")
 	ModelName = os.Getenv("MODEL_NAME")
+	CorsNames = os.Getenv("CORS")
 }

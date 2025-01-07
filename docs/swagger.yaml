@@ -6,6 +6,8 @@ definitions:
         type: string
       password:
         type: string
+    required:
+    - password
     type: object
   dto.RequestDto:
     properties:
@@ -19,9 +21,15 @@ definitions:
       name:
         type: string
       password:
+        minLength: 8
         type: string
       surname:
         type: string
+    required:
+    - email
+    - name
+    - password
+    - surname
     type: object
   users.Role:
     properties:

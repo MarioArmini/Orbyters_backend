@@ -253,6 +253,9 @@ const docTemplate = `{
     "definitions": {
         "dto.LoginData": {
             "type": "object",
+            "required": [
+                "password"
+            ],
             "properties": {
                 "email": {
                     "type": "string"
@@ -272,6 +275,12 @@ const docTemplate = `{
         },
         "dto.SignUpData": {
             "type": "object",
+            "required": [
+                "email",
+                "name",
+                "password",
+                "surname"
+            ],
             "properties": {
                 "email": {
                     "type": "string"
@@ -280,7 +289,8 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "password": {
-                    "type": "string"
+                    "type": "string",
+                    "minLength": 8
                 },
                 "surname": {
                     "type": "string"
