@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"Orbyters/config"
 	"Orbyters/models/auth/dto"
 	models "Orbyters/models/users"
 	userDto "Orbyters/models/users/dto"
@@ -10,8 +11,10 @@ import (
 	emailTemplates "Orbyters/shared/emails"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
@@ -181,5 +184,139 @@ func GetUserDetails(router *gin.Engine, db *gorm.DB) {
 			"createdAt": user.CreatedAt,
 			"roles":     user.Roles,
 		})
+	})
+}
+
+// @Summary Allow user to reset password
+// @Description Reset the users's password
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param request body dto.ForgotPasswordDto true "User email"
+// @Success 200 {object} map[string]string "Password reset requested"
+// @Router /auth/forgot-password [post]
+func ForgotPassword(router *gin.Engine, db *gorm.DB) {
+	router.POST("/auth/forgot-password", func(c *gin.Context) {
+		var request dto.ForgotPasswordDto
+
+		if err := c.BindJSON(&request); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid input"})
+			return
+		}
+
+		var user models.User
+		if err := db.Where("email = ?", request.Email).First(&user).Error; err != nil {
+			if err == gorm.ErrRecordNotFound {
+				c.JSON(http.StatusNotFound, gin.H{"error": "Email not found"})
+			} else {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
+			}
+			return
+		}
+
+		resetToken := uuid.New().String()
+		expiry := time.Now().Add(1 * time.Hour)
+
+		user.Reset_token = resetToken
+		user.Reset_token_expiry = &expiry
+
+		if err := db.Save(&user).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error saving reset token"})
+			return
+		}
+
+		resetLink := config.FeUrl + "/auth/reset-password?token=" + resetToken
+		emailService := emailService.NewEmailService()
+		subject, body := emailTemplates.GetForgotPasswordEmailTemplate(resetLink)
+		recipients := []string{*user.Email}
+
+		err := emailService.SendEmail(subject, body, recipients)
+		if err != nil {
+			log.Fatalf("Error sending mail: %v", err)
+		} else {
+			log.Println("Email sent")
+		}
+
+		c.JSON(http.StatusOK, gin.H{"message": "Password reset link sent to your email"})
+	})
+}
+
+// @Summary Verifies reset token
+// @Description Vverifies reset token
+// @Tags Auth
+// @Produce json
+// @Success 200 {object} map[string]string "Token valid"
+// @Router /auth/verify-reset-token [get]
+func VerifyResetToken(router *gin.Engine, db *gorm.DB) {
+	router.GET("/auth/verify-reset-token", func(c *gin.Context) {
+		token := c.Query("token")
+
+		var user models.User
+		if err := db.Where("reset_token = ?", token).First(&user).Error; err != nil {
+			if err == gorm.ErrRecordNotFound {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
+			} else {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
+			}
+			return
+		}
+
+		if user.Reset_token_expiry == nil || time.Now().After(*user.Reset_token_expiry) {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Token expired"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"message": "Token is valid"})
+	})
+}
+
+// @Summary Resets password
+// @Description Reset the users's password
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param request body dto.ResetPasswordDto true "New password"
+// @Success 200 {object} map[string]string "Password changed"
+// @Router /auth/reset-password [post]
+func ResetPassword(router *gin.Engine, db *gorm.DB) {
+	router.POST("/auth/reset-password", func(c *gin.Context) {
+		var request dto.ResetPasswordDto
+
+		if err := c.BindJSON(&request); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+			return
+		}
+
+		var user models.User
+		if err := db.Where("reset_token = ?", request.Token).First(&user).Error; err != nil {
+			if err == gorm.ErrRecordNotFound {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
+			} else {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
+			}
+			return
+		}
+
+		if user.Reset_token_expiry == nil || time.Now().After(*user.Reset_token_expiry) {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Token expired"})
+			return
+		}
+
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(request.NewPassword), bcrypt.DefaultCost)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
+			return
+		}
+
+		user.PassWordHash = string(hashedPassword)
+		user.Reset_token = uuid.Nil.String()
+		user.Reset_token_expiry = nil
+
+		if err := db.Save(&user).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error updating password"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"message": "Password updated successfully"})
 	})
 }

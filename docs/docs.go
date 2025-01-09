@@ -15,6 +15,43 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/auth/forgot-password": {
+            "post": {
+                "description": "Reset the users's password",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Allow user to reset password",
+                "parameters": [
+                    {
+                        "description": "User email",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ForgotPasswordDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Password reset requested",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/auth/login": {
             "post": {
                 "description": "Login an existing user and get a JWT token",
@@ -143,6 +180,66 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Invalid input",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/reset-password": {
+            "post": {
+                "description": "Reset the users's password",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Resets password",
+                "parameters": [
+                    {
+                        "description": "New password",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResetPasswordDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Password changed",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/verify-reset-token": {
+            "get": {
+                "description": "Vverifies reset token",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Verifies reset token",
+                "responses": {
+                    "200": {
+                        "description": "Token valid",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -288,6 +385,14 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "dto.ForgotPasswordDto": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.LoginData": {
             "type": "object",
             "required": [
@@ -307,6 +412,17 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "inputs": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ResetPasswordDto": {
+            "type": "object",
+            "properties": {
+                "newPassword": {
+                    "type": "string"
+                },
+                "token": {
                     "type": "string"
                 }
             }
@@ -374,6 +490,12 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "passWordHash": {
+                    "type": "string"
+                },
+                "reset_token": {
+                    "type": "string"
+                },
+                "reset_token_expiry": {
                     "type": "string"
                 },
                 "roles": {

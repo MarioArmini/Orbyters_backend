@@ -1,5 +1,10 @@
 basePath: /
 definitions:
+  dto.ForgotPasswordDto:
+    properties:
+      email:
+        type: string
+    type: object
   dto.LoginData:
     properties:
       email:
@@ -13,6 +18,13 @@ definitions:
   dto.RequestDto:
     properties:
       inputs:
+        type: string
+    type: object
+  dto.ResetPasswordDto:
+    properties:
+      newPassword:
+        type: string
+      token:
         type: string
     type: object
   dto.SignUpData:
@@ -59,6 +71,10 @@ definitions:
         type: string
       passWordHash:
         type: string
+      reset_token:
+        type: string
+      reset_token_expiry:
+        type: string
       roles:
         items:
           $ref: '#/definitions/users.Role'
@@ -75,6 +91,30 @@ info:
   title: Orbyters API Documentation
   version: "1.0"
 paths:
+  /auth/forgot-password:
+    post:
+      consumes:
+      - application/json
+      description: Reset the users's password
+      parameters:
+      - description: User email
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ForgotPasswordDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Password reset requested
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Allow user to reset password
+      tags:
+      - Auth
   /auth/login:
     post:
       consumes:
@@ -162,6 +202,45 @@ paths:
               type: string
             type: object
       summary: User Registration
+      tags:
+      - Auth
+  /auth/reset-password:
+    post:
+      consumes:
+      - application/json
+      description: Reset the users's password
+      parameters:
+      - description: New password
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ResetPasswordDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Password changed
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Resets password
+      tags:
+      - Auth
+  /auth/verify-reset-token:
+    get:
+      description: Vverifies reset token
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Token valid
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Verifies reset token
       tags:
       - Auth
   /mistral/generate:

@@ -7,14 +7,16 @@ import (
 )
 
 type User struct {
-	Id           uint `gorm:"primaryKey"`
-	Name         string
-	Surname      string
-	Email        *string `gorm:"unique;not null"`
-	CreatedAt    *time.Time
-	UpdatedAt    *time.Time
-	PassWordHash string `gorm:"not null"`
-	Roles        []Role `gorm:"many2many:user_roles;"`
+	Id                 uint `gorm:"primaryKey"`
+	Name               string
+	Surname            string
+	Email              *string `gorm:"unique;not null"`
+	CreatedAt          *time.Time
+	UpdatedAt          *time.Time
+	PassWordHash       string `gorm:"not null"`
+	Roles              []Role `gorm:"many2many:user_roles;"`
+	Reset_token        string
+	Reset_token_expiry *time.Time
 }
 
 func (u *User) CreateUser(db *gorm.DB) error {

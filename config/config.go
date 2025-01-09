@@ -20,6 +20,8 @@ var (
 	SmtpUser           string
 	SmtpPass           string
 	SmtpMail           string
+	ApiUrl             string
+	FeUrl              string
 )
 
 func LoadConfig() {
@@ -45,4 +47,6 @@ func LoadConfig() {
 	SmtpUser = os.Getenv("SMTP_USERNAME")
 	SmtpPass = os.Getenv("SMTP_PASSWORD")
 	SmtpMail = os.Getenv("FROM_EMAIL")
+	ApiUrl = os.Getenv("API_URL")
+	os.Getenv("FE_URL")
 }
