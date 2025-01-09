@@ -48,5 +48,5 @@ func LoadConfig() {
 	SmtpPass = os.Getenv("SMTP_PASSWORD")
 	SmtpMail = os.Getenv("FROM_EMAIL")
 	ApiUrl = os.Getenv("API_URL")
-	os.Getenv("FE_URL")
+	FeUrl = os.Getenv("FE_URL")
 }

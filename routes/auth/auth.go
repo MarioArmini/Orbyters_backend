@@ -225,7 +225,7 @@ func ForgotPassword(router *gin.Engine, db *gorm.DB) {
 			return
 		}
 
-		resetLink := config.FeUrl + "/auth/reset-password?token=" + resetToken
+		resetLink := config.FeUrl + "/reset-password?token=" + resetToken
 		emailService := emailService.NewEmailService()
 		subject, body := emailTemplates.GetForgotPasswordEmailTemplate(resetLink)
 		recipients := []string{*user.Email}
