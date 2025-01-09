@@ -6,6 +6,7 @@ import (
 	userDto "Orbyters/models/users/dto"
 	emailService "Orbyters/services/emails"
 	jwtService "Orbyters/services/jwt"
+	middlewares "Orbyters/services/middlewares"
 	emailTemplates "Orbyters/shared/emails"
 	"log"
 	"net/http"
@@ -17,7 +18,7 @@ import (
 
 // @Summary User Registration
 // @Description Register a new user in the system
-// @Tags Users
+// @Tags Auth
 // @Accept json
 // @Produce json
 // @Param registration body dto.SignUpData true "User registration data"
@@ -79,7 +80,7 @@ func RegisterRoutes(router *gin.Engine, db *gorm.DB) {
 
 // @Summary User Login
 // @Description Login an existing user and get a JWT token
-// @Tags Users
+// @Tags Auth
 // @Accept json
 // @Produce json
 // @Param loginData body dto.LoginData true "User login data"
@@ -133,6 +134,52 @@ func LoginRoutes(router *gin.Engine, db *gorm.DB) {
 				Surname: user.Surname,
 				Roles:   user.Roles,
 			},
+		})
+	})
+}
+
+// @Summary Get details of the logged-in user
+// @Description Get the details of the currently authenticated user
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} users.User "User details"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Router /auth/me [get]
+func GetUserDetails(router *gin.Engine, db *gorm.DB) {
+	router.GET("/auth/me", middlewares.AuthMiddleware(), func(c *gin.Context) {
+		claims, exists := c.Get("claims")
+		if !exists {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to retrieve user claims"})
+			return
+		}
+
+		claimData, ok := claims.(*jwtService.Claims)
+		if !ok {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid claim type"})
+			return
+		}
+
+		userId := claimData.UserID
+
+		var user models.User
+		if err := db.Preload("Roles").First(&user, userId).Error; err != nil {
+			if err == gorm.ErrRecordNotFound {
+				c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+			} else {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Error retrieving user"})
+			}
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"id":        user.Id,
+			"email":     user.Email,
+			"name":      user.Name,
+			"surname":   user.Surname,
+			"createdAt": user.CreatedAt,
+			"roles":     user.Roles,
 		})
 	})
 }

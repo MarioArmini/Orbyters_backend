@@ -58,6 +58,7 @@ func main() {
 	usersRoutes.GetUserDetails(router, db)
 	huggingFaceRoutes.GenerateMistralText(router)
 	rolesRoutes.GetAllRoles(router, db)
+	authRoutes.GetUserDetails(router, db)
 
 	err = router.Run(":8080")
 	if err != nil {

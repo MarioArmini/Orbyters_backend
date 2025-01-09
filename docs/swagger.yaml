@@ -7,6 +7,7 @@ definitions:
       password:
         type: string
     required:
+    - email
     - password
     type: object
   dto.RequestDto:
@@ -109,7 +110,30 @@ paths:
             type: object
       summary: User Login
       tags:
-      - Users
+      - Auth
+  /auth/me:
+    get:
+      consumes:
+      - application/json
+      description: Get the details of the currently authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User details
+          schema:
+            $ref: '#/definitions/users.User'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get details of the logged-in user
+      tags:
+      - Auth
   /auth/register:
     post:
       consumes:
@@ -139,7 +163,7 @@ paths:
             type: object
       summary: User Registration
       tags:
-      - Users
+      - Auth
   /mistral/generate:
     post:
       consumes:
