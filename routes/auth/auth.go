@@ -43,6 +43,11 @@ func RegisterRoutes(router *gin.Engine, db *gorm.DB) {
 			return
 		}
 
+		if signUpData.Password != signUpData.ConfirmPassword {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "confirm password must be equal to passowrd"})
+			return
+		}
+
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(signUpData.Password), bcrypt.DefaultCost)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
@@ -204,6 +209,11 @@ func ForgotPassword(router *gin.Engine, db *gorm.DB) {
 			return
 		}
 
+		if err := request.Validate(); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"validation error": err})
+			return
+		}
+
 		var user models.User
 		if err := db.Where("email = ?", request.Email).First(&user).Error; err != nil {
 			if err == gorm.ErrRecordNotFound {
@@ -284,6 +294,16 @@ func ResetPassword(router *gin.Engine, db *gorm.DB) {
 
 		if err := c.BindJSON(&request); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+			return
+		}
+
+		if err := request.Validate(); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"validation error": err})
+			return
+		}
+
+		if request.NewPassword != request.ConfirmNewPassword {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "confirm password must be equal to passowrd"})
 			return
 		}
 

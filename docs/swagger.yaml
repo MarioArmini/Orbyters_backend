@@ -4,6 +4,8 @@ definitions:
     properties:
       email:
         type: string
+    required:
+    - email
     type: object
   dto.LoginData:
     properties:
@@ -22,13 +24,23 @@ definitions:
     type: object
   dto.ResetPasswordDto:
     properties:
+      confirmNewPassword:
+        minLength: 8
+        type: string
       newPassword:
+        minLength: 8
         type: string
       token:
         type: string
+    required:
+    - confirmNewPassword
+    - newPassword
     type: object
   dto.SignUpData:
     properties:
+      confirmPassword:
+        minLength: 8
+        type: string
       email:
         type: string
       name:
@@ -39,6 +51,7 @@ definitions:
       surname:
         type: string
     required:
+    - confirmPassword
     - email
     - name
     - password

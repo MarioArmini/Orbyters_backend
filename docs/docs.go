@@ -387,6 +387,9 @@ const docTemplate = `{
     "definitions": {
         "dto.ForgotPasswordDto": {
             "type": "object",
+            "required": [
+                "email"
+            ],
             "properties": {
                 "email": {
                     "type": "string"
@@ -418,9 +421,18 @@ const docTemplate = `{
         },
         "dto.ResetPasswordDto": {
             "type": "object",
+            "required": [
+                "confirmNewPassword",
+                "newPassword"
+            ],
             "properties": {
+                "confirmNewPassword": {
+                    "type": "string",
+                    "minLength": 8
+                },
                 "newPassword": {
-                    "type": "string"
+                    "type": "string",
+                    "minLength": 8
                 },
                 "token": {
                     "type": "string"
@@ -430,12 +442,17 @@ const docTemplate = `{
         "dto.SignUpData": {
             "type": "object",
             "required": [
+                "confirmPassword",
                 "email",
                 "name",
                 "password",
                 "surname"
             ],
             "properties": {
+                "confirmPassword": {
+                    "type": "string",
+                    "minLength": 8
+                },
                 "email": {
                     "type": "string"
                 },
