@@ -25,7 +25,7 @@ var (
 )
 
 func LoadConfig() {
-	envPath, err := filepath.Abs("../../.env")
+	envPath, err := filepath.Abs(".env")
 	if err != nil {
 		log.Fatalf("Error getting absolute path for .env file: %v", err)
 	}

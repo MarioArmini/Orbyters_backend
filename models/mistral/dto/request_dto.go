@@ -1,5 +1,7 @@
 package dto
 
 type RequestDto struct {
-	Inputs string `json:"inputs"`
+	UserId         uint   `json:"userId"`
+	Inputs         string `json:"inputs"`
+	ConversationId *uint  `json:"conversationId"`
 }

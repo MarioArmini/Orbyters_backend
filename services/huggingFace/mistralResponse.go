@@ -2,10 +2,12 @@ package huggingface
 
 import (
 	"Orbyters/config"
+	"Orbyters/models/conversations"
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 )
 
@@ -20,22 +22,28 @@ type APIResponse struct {
 	Choices []Choice `json:"choices"`
 }
 
-func GetMistralResponse(prompt string) (string, error) {
+func GetMistralResponse(history []conversations.Message) (string, error) {
 	apiToken := config.HuggingFaceKey
 	url := config.HugginFaceUrl
 
-	message := map[string]interface{}{
-		"role":    "user",
-		"content": prompt,
+	messages := make([]map[string]interface{}, 0, len(history)+1)
+
+	for _, msg := range history {
+		messages = append(messages, map[string]interface{}{
+			"role":    msg.Role,
+			"content": msg.Content,
+		})
 	}
 
 	body := map[string]interface{}{
 		"model":       config.ModelName,
-		"messages":    []map[string]interface{}{message},
+		"messages":    messages,
 		"temperature": 0.5,
 		"max_tokens":  2048,
 		"top_p":       0.7,
 	}
+
+	log.Print(body)
 
 	jsonData, err := json.Marshal(body)
 	if err != nil {

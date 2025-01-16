@@ -1,7 +1,7 @@
 swag:
-	swag init -g cmd/server/main.go
+	swag init --parseDependency --parseInternal -g main.go
 
 run:
-	cd cmd/server && go run main.go
+	go run main.go
 
 .PHONY: swag run

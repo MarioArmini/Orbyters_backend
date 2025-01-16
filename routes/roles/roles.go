@@ -1,7 +1,7 @@
 package roles
 
 import (
-	models "Orbyters/models/users"
+	"Orbyters/models/users"
 	"Orbyters/services/middlewares"
 	"net/http"
 
@@ -18,10 +18,10 @@ import (
 // @Router /roles [get]
 func GetAllRoles(router *gin.Engine, db *gorm.DB) {
 	router.GET("/roles", middlewares.AuthMiddleware(), func(c *gin.Context) {
-		var roles []models.Role
+		var roles []users.Role
 		var err error
 
-		if roles, err = models.GetAllRoles(db); err != nil {
+		if roles, err = users.GetAllRoles(db); err != nil {
 			if err == gorm.ErrRecordNotFound {
 				c.JSON(http.StatusNotFound, gin.H{"error": "Roles not found"})
 			} else {

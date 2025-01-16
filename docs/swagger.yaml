@@ -1,5 +1,44 @@
 basePath: /
 definitions:
+  conversations.Conversation:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: integer
+      messages:
+        items:
+          $ref: '#/definitions/conversations.Message'
+        type: array
+      updatedAt:
+        type: string
+      userId:
+        type: integer
+    type: object
+  conversations.Message:
+    properties:
+      content:
+        type: string
+      conversationId:
+        type: integer
+      createdAt:
+        type: string
+      id:
+        type: integer
+      messageType:
+        $ref: '#/definitions/conversations.MessageType'
+      messageTypeId:
+        type: integer
+      role:
+        type: string
+    type: object
+  conversations.MessageType:
+    properties:
+      id:
+        type: integer
+      type:
+        type: string
+    type: object
   dto.ForgotPasswordDto:
     properties:
       email:
@@ -19,8 +58,12 @@ definitions:
     type: object
   dto.RequestDto:
     properties:
+      conversationId:
+        type: integer
       inputs:
         type: string
+      userId:
+        type: integer
     type: object
   dto.ResetPasswordDto:
     properties:
@@ -74,6 +117,10 @@ definitions:
     type: object
   users.User:
     properties:
+      conversations:
+        items:
+          $ref: '#/definitions/conversations.Conversation'
+        type: array
       createdAt:
         type: string
       email:
@@ -175,7 +222,9 @@ paths:
         "200":
           description: User details
           schema:
-            $ref: '#/definitions/users.User'
+            additionalProperties:
+              type: string
+            type: object
         "401":
           description: Unauthorized
           schema:

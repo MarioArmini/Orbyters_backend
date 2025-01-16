@@ -129,7 +129,10 @@ const docTemplate = `{
                     "200": {
                         "description": "User details",
                         "schema": {
-                            "$ref": "#/definitions/users.User"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "401": {
@@ -385,6 +388,66 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "conversations.Conversation": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "messages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/conversations.Message"
+                    }
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "userId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "conversations.Message": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "conversationId": {
+                    "type": "integer"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "messageType": {
+                    "$ref": "#/definitions/conversations.MessageType"
+                },
+                "messageTypeId": {
+                    "type": "integer"
+                },
+                "role": {
+                    "type": "string"
+                }
+            }
+        },
+        "conversations.MessageType": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.ForgotPasswordDto": {
             "type": "object",
             "required": [
@@ -414,8 +477,14 @@ const docTemplate = `{
         "dto.RequestDto": {
             "type": "object",
             "properties": {
+                "conversationId": {
+                    "type": "integer"
+                },
                 "inputs": {
                     "type": "string"
+                },
+                "userId": {
+                    "type": "integer"
                 }
             }
         },
@@ -494,6 +563,12 @@ const docTemplate = `{
         "users.User": {
             "type": "object",
             "properties": {
+                "conversations": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/conversations.Conversation"
+                    }
+                },
                 "createdAt": {
                     "type": "string"
                 },

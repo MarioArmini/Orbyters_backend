@@ -3,6 +3,8 @@ package users
 import (
 	"time"
 
+	"Orbyters/models/conversations"
+
 	"gorm.io/gorm"
 )
 
@@ -14,9 +16,10 @@ type User struct {
 	CreatedAt          *time.Time
 	UpdatedAt          *time.Time
 	PassWordHash       string `gorm:"not null"`
-	Roles              []Role `gorm:"many2many:user_roles;"`
+	Roles              []Role `gorm:"many2many:user_roles;" swagger:"ignore"`
 	Reset_token        string
 	Reset_token_expiry *time.Time
+	Conversations      []conversations.Conversation
 }
 
 func (u *User) CreateUser(db *gorm.DB) error {
@@ -32,6 +35,12 @@ func (u *User) GetUserByEmail(db *gorm.DB) (*User, error) {
 func GetUserById(db *gorm.DB, userId uint) (*User, error) {
 	var user User
 	err := db.Where("Id = ?", userId).First(&user).Error
+	return &user, err
+}
+
+func GetUserForChat(db *gorm.DB, userId uint) (*User, error) {
+	var user User
+	err := db.Where("Id = ?", userId).Preload("Conversations").First(&user).Error
 	return &user, err
 }
 

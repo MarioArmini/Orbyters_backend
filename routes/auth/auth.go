@@ -3,7 +3,7 @@ package routes
 import (
 	"Orbyters/config"
 	"Orbyters/models/auth/dto"
-	models "Orbyters/models/users"
+	"Orbyters/models/users"
 	userDto "Orbyters/models/users/dto"
 	emailService "Orbyters/services/emails"
 	jwtService "Orbyters/services/jwt"
@@ -31,7 +31,7 @@ import (
 func RegisterRoutes(router *gin.Engine, db *gorm.DB) {
 	router.POST("/auth/register", func(c *gin.Context) {
 		var signUpData dto.SignUpData
-		var user models.User
+		var user users.User
 
 		if err := c.BindJSON(&signUpData); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
@@ -59,7 +59,7 @@ func RegisterRoutes(router *gin.Engine, db *gorm.DB) {
 		user.Email = &signUpData.Email
 		user.PassWordHash = string(hashedPassword)
 
-		customerRole, err := models.GetRoleByName(db, "Customer")
+		customerRole, err := users.GetRoleByName(db, "Customer")
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error creating user"})
 			return
@@ -110,7 +110,7 @@ func LoginRoutes(router *gin.Engine, db *gorm.DB) {
 			return
 		}
 
-		var user models.User
+		var user users.User
 		err := db.Where("email = ?", loginData.Email).Preload("Roles").First(&user).Error
 		if err != nil {
 			if err == gorm.ErrRecordNotFound {
@@ -152,7 +152,7 @@ func LoginRoutes(router *gin.Engine, db *gorm.DB) {
 // @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Success 200 {object} users.User "User details"
+// @Success 200 {object} map[string]string "User details"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Router /auth/me [get]
 func GetUserDetails(router *gin.Engine, db *gorm.DB) {
@@ -171,7 +171,7 @@ func GetUserDetails(router *gin.Engine, db *gorm.DB) {
 
 		userId := claimData.UserID
 
-		var user models.User
+		var user users.User
 		if err := db.Preload("Roles").First(&user, userId).Error; err != nil {
 			if err == gorm.ErrRecordNotFound {
 				c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
@@ -214,7 +214,7 @@ func ForgotPassword(router *gin.Engine, db *gorm.DB) {
 			return
 		}
 
-		var user models.User
+		var user users.User
 		if err := db.Where("email = ?", request.Email).First(&user).Error; err != nil {
 			if err == gorm.ErrRecordNotFound {
 				c.JSON(http.StatusNotFound, gin.H{"error": "Email not found"})
@@ -261,7 +261,7 @@ func VerifyResetToken(router *gin.Engine, db *gorm.DB) {
 	router.GET("/auth/verify-reset-token", func(c *gin.Context) {
 		token := c.Query("token")
 
-		var user models.User
+		var user users.User
 		if err := db.Where("reset_token = ?", token).First(&user).Error; err != nil {
 			if err == gorm.ErrRecordNotFound {
 				c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
@@ -307,7 +307,7 @@ func ResetPassword(router *gin.Engine, db *gorm.DB) {
 			return
 		}
 
-		var user models.User
+		var user users.User
 		if err := db.Where("reset_token = ?", request.Token).First(&user).Error; err != nil {
 			if err == gorm.ErrRecordNotFound {
 				c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})

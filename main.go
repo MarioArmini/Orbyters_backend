@@ -2,7 +2,8 @@ package main
 
 import (
 	"Orbyters/config"
-	models "Orbyters/models/users"
+	conversationModels "Orbyters/models/conversations"
+	userModels "Orbyters/models/users"
 	authRoutes "Orbyters/routes/auth"
 	huggingFaceRoutes "Orbyters/routes/huggingFace"
 	rolesRoutes "Orbyters/routes/roles"
@@ -37,9 +38,9 @@ func main() {
 		log.Fatal("failed to connect to the database", err)
 	}
 
-	db.AutoMigrate(&models.User{})
+	applyMigrations(db)
 
-	config.SeedRoles(db)
+	config.ApplySeeds(db)
 
 	router := gin.Default()
 
@@ -56,7 +57,7 @@ func main() {
 	authRoutes.RegisterRoutes(router, db)
 	authRoutes.LoginRoutes(router, db)
 	usersRoutes.GetUserDetails(router, db)
-	huggingFaceRoutes.GenerateMistralText(router)
+	huggingFaceRoutes.GenerateMistralText(router, db)
 	rolesRoutes.GetAllRoles(router, db)
 	authRoutes.GetUserDetails(router, db)
 	authRoutes.ForgotPassword(router, db)
@@ -67,4 +68,13 @@ func main() {
 	if err != nil {
 		log.Fatal("Failed to run server: ", err)
 	}
+}
+
+func applyMigrations(db *gorm.DB) {
+	db.AutoMigrate(
+		&userModels.User{},
+		&conversationModels.Conversation{},
+		&conversationModels.Message{},
+		&conversationModels.MessageType{},
+	)
 }
