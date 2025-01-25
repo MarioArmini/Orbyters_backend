@@ -6,6 +6,8 @@ import (
 	"Orbyters/services/middlewares"
 	"net/http"
 
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -53,5 +55,40 @@ func GetUserDetails(router *gin.Engine, db *gorm.DB) {
 			"createdAt": user.CreatedAt,
 			"roles":     user.Roles,
 		})
+	})
+}
+
+// @Summary HasSubscription
+// @Description Verifies if a user has a subscription
+// @Tags Users
+// @Accept json
+// @Param userId query int true "User ID"
+// @Param subscriptionId query int true "Subscription ID"
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} boolean
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Router /user/hasSub [get]
+func HasSubscription(router *gin.Engine, db *gorm.DB) {
+	router.GET("/user/hasSub", middlewares.AuthMiddleware(), func(c *gin.Context) {
+		userId, err := strconv.Atoi(c.Query("userId"))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+			return
+		}
+
+		subscriptionId, err := strconv.Atoi(c.Query("subscriptionId"))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid subscription ID"})
+			return
+		}
+
+		hasSubscription, err := models.HasSubscription(db, uint(userId), uint(subscriptionId))
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error verifying subscription"})
+			return
+		}
+
+		c.JSON(http.StatusOK, hasSubscription)
 	})
 }

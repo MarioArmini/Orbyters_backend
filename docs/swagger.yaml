@@ -115,6 +115,21 @@ definitions:
           $ref: '#/definitions/users.User'
         type: array
     type: object
+  users.Subscription:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      price:
+        type: number
+      title:
+        type: string
+      users:
+        items:
+          $ref: '#/definitions/users.User'
+        type: array
+    type: object
   users.User:
     properties:
       conversations:
@@ -138,6 +153,10 @@ definitions:
       roles:
         items:
           $ref: '#/definitions/users.Role'
+        type: array
+      subscriptions:
+        items:
+          $ref: '#/definitions/users.Subscription'
         type: array
       surname:
         type: string
@@ -366,6 +385,56 @@ paths:
       summary: Get All existing roles
       tags:
       - Roles
+  /subscription:
+    get:
+      description: Return a subscription by its Id
+      parameters:
+      - description: Subscription ID
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Invalid input
+          schema:
+            type: string
+        "500":
+          description: Error calling Subscriptions API
+          schema:
+            type: string
+      summary: GetSubscription
+      tags:
+      - Subscriptions
+  /subscriptions:
+    get:
+      consumes:
+      - application/json
+      description: Return all subscriptions
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Invalid input
+          schema:
+            type: string
+        "500":
+          description: Error calling Subscriptions API
+          schema:
+            type: string
+      summary: GetAllSubscriptions
+      tags:
+      - Subscriptions
   /user/details:
     get:
       consumes:
@@ -387,6 +456,40 @@ paths:
       security:
       - BearerAuth: []
       summary: Get details of the logged-in user
+      tags:
+      - Users
+  /user/hasSub:
+    get:
+      consumes:
+      - application/json
+      description: Verifies if a user has a subscription
+      parameters:
+      - description: User ID
+        in: query
+        name: userId
+        required: true
+        type: integer
+      - description: Subscription ID
+        in: query
+        name: subscriptionId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: boolean
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: HasSubscription
       tags:
       - Users
 securityDefinitions:

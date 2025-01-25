@@ -22,6 +22,7 @@ var (
 	SmtpMail           string
 	ApiUrl             string
 	FeUrl              string
+	StripeKey          string
 )
 
 func LoadConfig() {
@@ -49,4 +50,6 @@ func LoadConfig() {
 	SmtpMail = os.Getenv("FROM_EMAIL")
 	ApiUrl = os.Getenv("API_URL")
 	FeUrl = os.Getenv("FE_URL")
+
+	StripeKey = os.Getenv("STRIPE_KEY")
 }

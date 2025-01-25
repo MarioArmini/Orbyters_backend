@@ -7,6 +7,7 @@ import (
 	authRoutes "Orbyters/routes/auth"
 	huggingFaceRoutes "Orbyters/routes/huggingFace"
 	rolesRoutes "Orbyters/routes/roles"
+	subscritpionsRoutes "Orbyters/routes/subscriptions"
 	usersRoutes "Orbyters/routes/users"
 	"log"
 	"strings"
@@ -63,6 +64,9 @@ func main() {
 	authRoutes.ForgotPassword(router, db)
 	authRoutes.VerifyResetToken(router, db)
 	authRoutes.ResetPassword(router, db)
+	subscritpionsRoutes.GetAllSubscriptions(router, db)
+	subscritpionsRoutes.GetSubscriptionById(router, db)
+	usersRoutes.HasSubscription(router, db)
 
 	err = router.Run(":8080")
 	if err != nil {
@@ -76,5 +80,7 @@ func applyMigrations(db *gorm.DB) {
 		&conversationModels.Conversation{},
 		&conversationModels.Message{},
 		&conversationModels.MessageType{},
+		&userModels.Subscription{},
+		&userModels.UserSubscription{},
 	)
 }

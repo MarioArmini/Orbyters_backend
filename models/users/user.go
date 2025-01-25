@@ -20,6 +20,7 @@ type User struct {
 	Reset_token        string
 	Reset_token_expiry *time.Time
 	Conversations      []conversations.Conversation
+	Subscriptions      []Subscription `gorm:"many2many:user_subscriptions;"`
 }
 
 func (u *User) CreateUser(db *gorm.DB) error {
@@ -34,7 +35,7 @@ func (u *User) GetUserByEmail(db *gorm.DB) (*User, error) {
 
 func GetUserById(db *gorm.DB, userId uint) (*User, error) {
 	var user User
-	err := db.Where("Id = ?", userId).First(&user).Error
+	err := db.Where("Id = ?", userId).Preload("Subscriptions").First(&user).Error
 	return &user, err
 }
 

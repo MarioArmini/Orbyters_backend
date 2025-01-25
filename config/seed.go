@@ -12,6 +12,7 @@ import (
 func ApplySeeds(db *gorm.DB) {
 	seedRoles(db)
 	seedMessageTypes(db)
+	seedSubscriptions(db)
 }
 
 func seedRoles(db *gorm.DB) {
@@ -60,6 +61,33 @@ func seedMessageTypes(db *gorm.DB) {
 			log.Printf("Message type '%s' created.", messageType.Type)
 		} else {
 			log.Printf("Message type '%s' already existing.", messageType.Type)
+		}
+	}
+}
+
+func seedSubscriptions(db *gorm.DB) {
+	subscriptions := []userModels.Subscription{
+		{Price: 120.00, Title: "Moon", Description: "moonDescription"},
+	}
+
+	for _, subscription := range subscriptions {
+		var existingSubscription userModels.Subscription
+		err := db.Where("Title = ?", subscription.Title).First(&existingSubscription).Error
+		if err != nil && err != gorm.ErrRecordNotFound {
+			log.Fatalf("Error creating subscription: %v", err)
+		}
+
+		if existingSubscription.Id == 0 {
+			existingSubscription.Title = subscription.Title
+			existingSubscription.Price = subscription.Price
+			existingSubscription.Description = subscription.Description
+
+			if err := existingSubscription.CreateSubscription(db); err != nil {
+				log.Fatalf("Error saving subscription: %v", err)
+			}
+			log.Printf("Subscription '%s' created.", subscription.Title)
+		} else {
+			log.Printf("Subscription '%s' already existing.", subscription.Title)
 		}
 	}
 }

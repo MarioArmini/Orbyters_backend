@@ -172,7 +172,7 @@ func GetUserDetails(router *gin.Engine, db *gorm.DB) {
 		userId := claimData.UserID
 
 		var user users.User
-		if err := db.Preload("Roles").First(&user, userId).Error; err != nil {
+		if err := db.Preload("Roles").Preload("Subscriptions").First(&user, userId).Error; err != nil {
 			if err == gorm.ErrRecordNotFound {
 				c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 			} else {
@@ -182,12 +182,13 @@ func GetUserDetails(router *gin.Engine, db *gorm.DB) {
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"id":        user.Id,
-			"email":     user.Email,
-			"name":      user.Name,
-			"surname":   user.Surname,
-			"createdAt": user.CreatedAt,
-			"roles":     user.Roles,
+			"id":            user.Id,
+			"email":         user.Email,
+			"name":          user.Name,
+			"surname":       user.Surname,
+			"createdAt":     user.CreatedAt,
+			"roles":         user.Roles,
+			"subscriptions": user.Subscriptions,
 		})
 	})
 }
