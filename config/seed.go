@@ -6,6 +6,10 @@ import (
 	conversationsModels "Orbyters/models/conversations"
 	userModels "Orbyters/models/users"
 
+	"github.com/stripe/stripe-go/v81"
+	"github.com/stripe/stripe-go/v81/price"
+	"github.com/stripe/stripe-go/v81/product"
+
 	"gorm.io/gorm"
 )
 
@@ -67,7 +71,7 @@ func seedMessageTypes(db *gorm.DB) {
 
 func seedSubscriptions(db *gorm.DB) {
 	subscriptions := []userModels.Subscription{
-		{Price: 120.00, Title: "Moon", Description: "moonDescription"},
+		{Price: 120.00, Title: "Moon", Description: "moonDescription", StripeProductId: ""},
 	}
 
 	for _, subscription := range subscriptions {
@@ -81,6 +85,13 @@ func seedSubscriptions(db *gorm.DB) {
 			existingSubscription.Title = subscription.Title
 			existingSubscription.Price = subscription.Price
 			existingSubscription.Description = subscription.Description
+			existingSubscription.StripeProductId = subscription.StripeProductId
+
+			productId, err := refreshProduct(subscription.Title, subscription.Price)
+			if err != nil {
+				log.Fatalf("Error creating product: %v", err)
+			}
+			existingSubscription.StripeProductId = productId
 
 			if err := existingSubscription.CreateSubscription(db); err != nil {
 				log.Fatalf("Error saving subscription: %v", err)
@@ -90,4 +101,31 @@ func seedSubscriptions(db *gorm.DB) {
 			log.Printf("Subscription '%s' already existing.", subscription.Title)
 		}
 	}
+}
+
+func refreshProduct(productName string, productPrice float64) (string, error) {
+	stripe.Key = StripeKey
+
+	productParams := &stripe.ProductParams{
+		Name: stripe.String(productName),
+	}
+	createdProduct, err := product.New(productParams)
+	if err != nil {
+		return "", err
+	}
+
+	priceParams := &stripe.PriceParams{
+		Currency:   stripe.String(string(stripe.CurrencyEUR)),
+		UnitAmount: stripe.Int64(int64(productPrice * 100)),
+		Recurring: &stripe.PriceRecurringParams{
+			Interval: stripe.String(string(stripe.PriceRecurringIntervalMonth)),
+		},
+		Product: stripe.String(createdProduct.ID),
+	}
+	_, err = price.New(priceParams)
+	if err != nil {
+		return "", err
+	}
+
+	return createdProduct.ID, nil
 }
