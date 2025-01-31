@@ -701,6 +701,9 @@ const docTemplate = `{
                 "price": {
                     "type": "number"
                 },
+                "stripeProductId": {
+                    "type": "string"
+                },
                 "title": {
                     "type": "string"
                 },

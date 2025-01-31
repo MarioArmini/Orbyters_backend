@@ -5,12 +5,12 @@ import (
 )
 
 type Subscription struct {
-	Id              uint `gorm:"primaryKey"`
-	Price           float64
-	Title           string
-	Description     string
-	Users           []User `gorm:"many2many:user_subscriptions;"`
-	StripeProductId string
+	Id              uint    `gorm:"primaryKey" json:"id"`
+	Price           float64 `json:"price"`
+	Title           string  `json:"title"`
+	Description     string  `json:"description"`
+	Users           []User  `gorm:"many2many:user_subscriptions;"`
+	StripeProductId string  `json:"stripeProductId"`
 }
 
 func (s *Subscription) CreateSubscription(db *gorm.DB) error {
